@@ -18,5 +18,5 @@ server:
   port: ${SERVER_PORT:8081}
 
 jwt:
-  secret: ${JWT_SECRET:local-development-secret-change-before-deploy}
+  secret: ${JWT_SECRET:SON-GOKU-KAKAROTO-MR-BEAST-EN-LAS-MONTAÑAS-DEL-EDEN}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}

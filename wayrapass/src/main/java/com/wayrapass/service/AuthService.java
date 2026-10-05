@@ -23,6 +23,8 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional(noRollbackFor = ResponseStatusException.class)
@@ -35,6 +37,8 @@ public class AuthService {
     private static final long LOCK_DURATION_SECONDS = 15 * 60;
     private static final String PASSWORD_ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final String JWT_ALGORITHM = "HmacSHA256";
+    private static final Pattern SUBJECT_PATTERN = Pattern.compile("\"sub\":\"([1-9][0-9]*)\"");
+    private static final Pattern EXPIRATION_PATTERN = Pattern.compile("\"exp\":([0-9]+)");
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
@@ -108,6 +112,52 @@ public class AuthService {
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
         return createAuthResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User requireAuthenticatedUser(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw unauthorizedToken();
+        }
+
+        String[] tokenParts = authorizationHeader.substring(7).trim().split("\\.", -1);
+        if (tokenParts.length != 3) {
+            throw unauthorizedToken();
+        }
+
+        try {
+            String header = new String(Base64.getUrlDecoder().decode(tokenParts[0]), StandardCharsets.UTF_8);
+            if (!"{\"alg\":\"HS256\",\"typ\":\"JWT\"}".equals(header)) {
+                throw unauthorizedToken();
+            }
+
+            String signedContent = tokenParts[0] + "." + tokenParts[1];
+            byte[] providedSignature = Base64.getUrlDecoder().decode(tokenParts[2]);
+            if (!MessageDigest.isEqual(sign(signedContent), providedSignature)) {
+                throw unauthorizedToken();
+            }
+
+            String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]), StandardCharsets.UTF_8);
+            Matcher subjectMatcher = SUBJECT_PATTERN.matcher(payload);
+            Matcher expirationMatcher = EXPIRATION_PATTERN.matcher(payload);
+            if (!subjectMatcher.find() || !expirationMatcher.find()) {
+                throw unauthorizedToken();
+            }
+
+            long userId = Long.parseLong(subjectMatcher.group(1));
+            long expiration = Long.parseLong(expirationMatcher.group(1));
+            if (expiration <= Instant.now().getEpochSecond()) {
+                throw unauthorizedToken();
+            }
+
+            User user = userRepository.findById(userId).orElseThrow(AuthService::unauthorizedToken);
+            if (!user.isEnabled()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La cuenta está deshabilitada.");
+            }
+            return user;
+        } catch (IllegalArgumentException exception) {
+            throw unauthorizedToken();
+        }
     }
 
     private AuthResponseDTO createAuthResponse(User user) {
@@ -196,5 +246,9 @@ public class AuthService {
 
     private static ResponseStatusException invalidCredentials() {
         return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Correo o contraseña incorrectos.");
+    }
+
+    private static ResponseStatusException unauthorizedToken() {
+        return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "El token de autenticación no es válido.");
     }
 }
