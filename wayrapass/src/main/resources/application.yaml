@@ -1,3 +1,22 @@
 spring:
   application:
     name: wayrapass
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/wayrapass}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: ${SERVER_PORT:8081}
+
+jwt:
+  secret: ${JWT_SECRET:local-development-secret-change-before-deploy}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
