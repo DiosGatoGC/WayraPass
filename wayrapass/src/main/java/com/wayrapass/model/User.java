@@ -27,23 +27,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false, length = 120)
+    @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 254)
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(length = 30)
     private String phone;
 
     @Column(nullable = false)
     private boolean enabled = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 20)
     private Role role;
 
     @Column(name = "failed_login_attempts", nullable = false)

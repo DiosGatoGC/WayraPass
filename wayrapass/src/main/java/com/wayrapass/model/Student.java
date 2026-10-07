@@ -32,14 +32,14 @@ public class Student {
     @JoinColumn(name = "user_id", nullable = false, unique = true, updatable = false)
     private User user;
 
-    @Column(name = "student_code", unique = true, length = 50)
+    @Column(name = "student_code", length = 40)
     private String studentCode;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution institution;
 
-    @Column(name = "family_link_code_hash", length = 150)
+    @Column(name = "family_link_code_hash", length = 255)
     private String familyLinkCodeHash;
 
     @Column(name = "family_link_code_expires_at")

@@ -1,0 +1,14 @@
+package com.wayrapass.exception;
+import com.wayrapass.dto.response.ApiErrorResponse; import jakarta.servlet.http.HttpServletRequest; import org.springframework.dao.DataIntegrityViolationException; import org.springframework.http.*; import org.springframework.security.access.AccessDeniedException; import org.springframework.web.bind.MethodArgumentNotValidException; import org.springframework.web.bind.annotation.*; import java.time.Instant; import java.util.*; import java.util.stream.Collectors;
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+ @ExceptionHandler(MethodArgumentNotValidException.class) ResponseEntity<ApiErrorResponse> validation(MethodArgumentNotValidException e,HttpServletRequest r){var f=e.getBindingResult().getFieldErrors().stream().collect(Collectors.toMap(x->x.getField(),x->Objects.requireNonNullElse(x.getDefaultMessage(),"Valor inválido"),(a,b)->a,LinkedHashMap::new));return build(HttpStatus.BAD_REQUEST,"La solicitud contiene campos inválidos.",r,f);}
+ @ExceptionHandler(BusinessRuleException.class) ResponseEntity<ApiErrorResponse> business(BusinessRuleException e,HttpServletRequest r){return build(HttpStatus.BAD_REQUEST,e.getMessage(),r,null);}
+ @ExceptionHandler(UnauthorizedException.class) ResponseEntity<ApiErrorResponse> unauthorized(UnauthorizedException e,HttpServletRequest r){return build(HttpStatus.UNAUTHORIZED,e.getMessage(),r,null);}
+ @ExceptionHandler(AccountLockedException.class) ResponseEntity<ApiErrorResponse> locked(AccountLockedException e,HttpServletRequest r){return build(HttpStatus.LOCKED,e.getMessage(),r,null);}
+ @ExceptionHandler(AccessDeniedException.class) ResponseEntity<ApiErrorResponse> forbidden(AccessDeniedException e,HttpServletRequest r){return build(HttpStatus.FORBIDDEN,"No tiene permiso para realizar esta operación.",r,null);}
+ @ExceptionHandler(ResourceNotFoundException.class) ResponseEntity<ApiErrorResponse> missing(ResourceNotFoundException e,HttpServletRequest r){return build(HttpStatus.NOT_FOUND,e.getMessage(),r,null);}
+ @ExceptionHandler({ConflictException.class,DataIntegrityViolationException.class}) ResponseEntity<ApiErrorResponse> conflict(Exception e,HttpServletRequest r){return build(HttpStatus.CONFLICT,e instanceof ConflictException?e.getMessage():"La operación viola una restricción de integridad.",r,null);}
+ @ExceptionHandler(Exception.class) ResponseEntity<ApiErrorResponse> internal(Exception e,HttpServletRequest r){return build(HttpStatus.INTERNAL_SERVER_ERROR,"Ocurrió un error interno.",r,null);}
+ private ResponseEntity<ApiErrorResponse> build(HttpStatus s,String m,HttpServletRequest r,Map<String,String> f){return ResponseEntity.status(s).body(new ApiErrorResponse(Instant.now(),s.value(),s.getReasonPhrase(),m,r.getRequestURI(),f));}
+}

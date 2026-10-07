@@ -2,7 +2,10 @@ package com.wayrapass.controller;
 
 import com.wayrapass.dto.request.LoginRequestDTO;
 import com.wayrapass.dto.request.UserRequestDTO;
+import com.wayrapass.dto.request.ForgotPasswordRequest;
+import com.wayrapass.dto.request.ResetPasswordRequest;
 import com.wayrapass.dto.response.AuthResponseDTO;
+import com.wayrapass.dto.response.PasswordResetResponse;
 import com.wayrapass.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,4 +33,11 @@ public class AuthController {
     public AuthResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.login(request);
     }
+
+    @PostMapping("/forgot-password")
+    public PasswordResetResponse forgot(@Valid @RequestBody ForgotPasswordRequest request) { return authService.forgotPassword(request); }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reset(@Valid @RequestBody ResetPasswordRequest request) { authService.resetPassword(request); }
 }
