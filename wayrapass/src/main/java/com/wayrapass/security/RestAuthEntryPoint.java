@@ -1,0 +1,3 @@
+package com.wayrapass.security;
+import jakarta.servlet.http.*;import org.springframework.http.MediaType;import org.springframework.security.core.AuthenticationException;import org.springframework.security.web.AuthenticationEntryPoint;import org.springframework.stereotype.Component;import java.io.IOException;
+@Component public class RestAuthEntryPoint implements AuthenticationEntryPoint{public void commence(HttpServletRequest q,HttpServletResponse r,AuthenticationException e)throws IOException{r.setStatus(401);r.setContentType(MediaType.APPLICATION_JSON_VALUE);r.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Se requiere un token válido.\"}");}}

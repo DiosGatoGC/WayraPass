@@ -1,0 +1,6 @@
+package com.wayrapass.service;
+import com.wayrapass.dto.request.UserRequestDTO;import com.wayrapass.exception.BusinessRuleException;import com.wayrapass.mapper.UserMapper;import com.wayrapass.model.Role;import com.wayrapass.repository.*;import com.wayrapass.security.JwtService;import org.junit.jupiter.api.Test;import org.springframework.security.authentication.AuthenticationManager;import org.springframework.security.crypto.password.PasswordEncoder;import static org.junit.jupiter.api.Assertions.*;import static org.mockito.Mockito.*;
+class AuthServiceTest{
+ @Test void publicRegistrationRejectsPrivilegedRoles(){AuthService s=new AuthService(mock(UserRepository.class),mock(StudentRepository.class),mock(InstitutionRepository.class),mock(PasswordResetTokenRepository.class),mock(PasswordEncoder.class),mock(AuthenticationManager.class),mock(JwtService.class),mock(UserMapper.class),true);assertThrows(BusinessRuleException.class,()->s.register(new UserRequestDTO("Coordinator","coordinator@example.com","very-secure-password",null,Role.COORDINATOR,null,null)));assertThrows(BusinessRuleException.class,()->s.register(new UserRequestDTO("Driver","driver@example.com","very-secure-password",null,Role.DRIVER,null,null)));}
+ @Test void rolesAreExactlyTheDomainRoles(){assertArrayEquals(new Role[]{Role.STUDENT,Role.FAMILY,Role.DRIVER,Role.COORDINATOR},Role.values());}
+}

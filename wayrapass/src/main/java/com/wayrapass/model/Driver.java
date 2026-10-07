@@ -2,6 +2,8 @@ package com.wayrapass.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,7 +35,7 @@ public class Driver {
     @JoinColumn(name = "user_id", nullable = false, unique = true, updatable = false)
     private User user;
 
-    @Column(name = "license_number", unique = true, length = 120)
+    @Column(name = "license_number", nullable = false, unique = true, length = 50)
     private String licenseNumber;
 
     @Column(name = "credential_image_url", length = 500)
@@ -42,14 +44,16 @@ public class Driver {
     @Column(name = "license_expiration")
     private LocalDate licenseExpiration;
 
-    @Column(name = "license_category", length = 100)
+    @Column(name = "license_category", nullable = false, length = 20)
     private String licenseCategory;
 
-    @Column(name = "authorization_status", nullable = false, length = 30)
-    private String authorizationStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "authorization_status", nullable = false, length = 20)
+    private AuthorizationStatus authorizationStatus;
 
-    @Column(name = "operational_status", nullable = false, length = 30)
-    private String operationalStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operational_status", nullable = false, length = 20)
+    private DriverOperationalStatus operationalStatus;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -61,10 +65,10 @@ public class Driver {
     void onCreate() {
         Instant now = Instant.now();
         if (authorizationStatus == null) {
-            authorizationStatus = "PENDING";
+            authorizationStatus = AuthorizationStatus.PENDING;
         }
         if (operationalStatus == null) {
-            operationalStatus = "INACTIVE";
+            operationalStatus = DriverOperationalStatus.AVAILABLE;
         }
         createdAt = now;
         updatedAt = now;

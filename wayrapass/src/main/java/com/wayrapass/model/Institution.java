@@ -27,20 +27,20 @@ public class Institution {
     @Column(nullable = false, length = 150)
     private String name;
 
-    @Column(name = "campus_name", nullable = false, length = 150)
+    @Column(name = "campus_name", length = 150)
     private String campusName;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 250)
     private String address;
 
-    @Column(nullable = false, length = 150)
+    @Column(length = 100)
     private String district;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(nullable = false)
-    private boolean enabled = true;
+    private boolean active = true;
 
     @PrePersist
     void onCreate() {

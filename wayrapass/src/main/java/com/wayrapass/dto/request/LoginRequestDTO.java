@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record LoginRequestDTO(
-        @NotBlank @Email @Size(max = 254) String email,
+        @NotBlank @Email @Size(max = 150) String email,
         @NotBlank @Size(max = 128) String password
 ) {
 }
